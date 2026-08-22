@@ -1,20 +1,22 @@
 // boiler {{{
 package main
 
-
 import (
+	//"adolf-codler/file_transfer/internal/cli"
+	"adolf-codler/file_transfer/internal/sockets"
+	"adolf-codler/file_transfer/internal/template"
 	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-	"adolf-codler/file_transfer/internal/sockets"
-	"adolf-codler/file_transfer/internal/template"
 )
+
 ///}}}
 
 // main{{{
 func main() {
+	//cli_utils.Parse()
 	reader := bufio.NewReader(os.Stdin)
 
 	template.TP()
@@ -30,9 +32,9 @@ func main() {
 
 	switch choice {
 	case "1", "server", "Server":
-		soc.StartServer() // Calls function from helpers.go
+		soc.StartServer() 
 	case "2", "client", "Client":
-		soc.StartClient() // Calls function from helpers.go
+		soc.StartClient()  
 	default:
 		fmt.Println("Invalid choice. Please select 1 or 2.")
 	}
