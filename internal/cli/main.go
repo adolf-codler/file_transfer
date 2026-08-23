@@ -26,7 +26,11 @@ func Parse()(byte, string){
 		}
 		return 's', argv[2]
 	} else if command=="r"{
-		return 'r',""
+		if argc<3{
+			return 'r', ""
+		}else{
+			return 'r', argv[2]
+		}
 	} else{
 		return 0, ""
 	}
