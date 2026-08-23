@@ -15,7 +15,7 @@ const (
 )
 
 // startServer sets up the TCP listener and accepts connections
-func StartServer() {
+func StartServer(path string) {
 	var wg sync.WaitGroup
 	log.Printf("Server started")
 	listener, err := net.Listen("tcp", DEFAULT_PORT)
@@ -34,12 +34,12 @@ func StartServer() {
 	}
 	log.Printf("Handling Client")
 	wg.Add(1)
-	go HandleClient(conn, no, &wg)
+	go HandleClient(conn, no, &wg, path)
 	wg.Wait()
 }
 
 // handleClient manages individual client connections concurrently
-func HandleClient(conn net.Conn, no int, wg *sync.WaitGroup) {
+func HandleClient(conn net.Conn, no int, wg *sync.WaitGroup, path string) {
 	defer wg.Done()
 	log.Printf("Sending welcome message")
 	num := strconv.Itoa(no)
@@ -47,11 +47,11 @@ func HandleClient(conn net.Conn, no int, wg *sync.WaitGroup) {
 	conn.Write([]byte(msg))
 	log.Printf("Message sent")
 	log.Printf("Sending file")
-	transfer.SendFile(conn)
+	transfer.SendFile(conn, path)
 }
 
 // startClient connects to the server and reads the message stream
-func StartClient() {
+func StartClient(path string) {
 	log.Printf("Connecting to server")
 	conn, err := net.Dial("tcp", "127.0.0.1:4242")
 	if err != nil {
@@ -66,5 +66,6 @@ func StartClient() {
 
 	fmt.Print("Server response: ", message)
 	log.Printf("Receiving file")
-	transfer.RecvFile(conn)
+	transfer.RecvFile(conn, path)
+	log.Printf("Received")
 }

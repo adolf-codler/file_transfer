@@ -17,7 +17,7 @@ import (
 
 // main{{{
 func main() {
-	mode:=cli_utils.Parse()
+	mode,path:=cli_utils.Parse()
 	if mode==0{
 		return
 	}
@@ -37,9 +37,9 @@ func main() {
 
 	switch mode {
 	case 's':
-		soc.StartServer()
+		soc.StartServer(path)
 	case 'r':
-		soc.StartClient()
+		soc.StartClient(path)
 	default:
 		fmt.Println("Invalid choice. Please select 1 or 2.")
 	}

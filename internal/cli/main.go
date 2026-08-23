@@ -1,8 +1,9 @@
-package	cli_utils 
+package cli_utils
 
-import(
-	"os"
+import (
 	"fmt"
+	"log"
+	"os"
 )
 
 const(
@@ -11,18 +12,22 @@ const(
 
 )
 
-func Parse()byte{
-	arg:=os.Args
-	if len(arg)!=2{
+func Parse()(byte, string){
+	argv:=os.Args
+	argc:=len(argv)
+	if argc<2{
 		fmt.Println("Usage[]")
-		return 0 
+		return 0,"" 
 	}
-	command:=arg[1]
+	command:=argv[1]
 	if command=="s"{
-		return 's'
+		if argc<3{
+			log.Fatalln("Filepath not found")
+		}
+		return 's', argv[2]
 	} else if command=="r"{
-		return 'r'
+		return 'r',""
 	} else{
-		return 0
+		return 0, ""
 	}
 }
