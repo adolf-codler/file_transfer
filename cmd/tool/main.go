@@ -2,22 +2,26 @@
 package main
 
 import (
-	//"adolf-codler/file_transfer/internal/cli"
+	"adolf-codler/file_transfer/internal/cli"
 	"adolf-codler/file_transfer/internal/sockets"
-	"adolf-codler/file_transfer/internal/template"
-	"bufio"
+	//"adolf-codler/file_transfer/internal/data_transfer"
+	//"adolf-codler/file_transfer/internal/template"
+	//"bufio"
 	"fmt"
-	"log"
-	"os"
-	"strings"
+	//"log"
+	//"os"
+	//"strings"
 )
 
 ///}}}
 
 // main{{{
 func main() {
-	//cli_utils.Parse()
-	reader := bufio.NewReader(os.Stdin)
+	mode:=cli_utils.Parse()
+	if mode==0{
+		return
+	}
+	/*{{{reader := bufio.NewReader(os.Stdin)
 
 	template.TP()
 	
@@ -28,13 +32,14 @@ func main() {
 	}
 
 	choice := strings.TrimSpace(input)
+	}}}*/
 
 
-	switch choice {
-	case "1", "server", "Server":
-		soc.StartServer() 
-	case "2", "client", "Client":
-		soc.StartClient()  
+	switch mode {
+	case 's':
+		soc.StartServer()
+	case 'r':
+		soc.StartClient()
 	default:
 		fmt.Println("Invalid choice. Please select 1 or 2.")
 	}

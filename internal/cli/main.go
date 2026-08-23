@@ -5,25 +5,24 @@ import(
 	"fmt"
 )
 
-func Parse(mode *byte){
+const(
+	ARG_SEND=2
+	ARG_RECV=2
+
+)
+
+func Parse()byte{
 	arg:=os.Args
-	if len(arg)<2 || len(arg)>=4{
+	if len(arg)!=2{
 		fmt.Println("Usage[]")
-		return 
+		return 0 
 	}
 	command:=arg[1]
 	if command=="s"{
-		if len(arg)!=3{
-			fmt.Println("choose the file to send")
-			return 
-		} else{
-			*mode = 's'
-		}
-	} else if command =="r"{
-		*mode='r'
-
-	} else {
-		fmt.Println("Usage[]")
-		return 
+		return 's'
+	} else if command=="r"{
+		return 'r'
+	} else{
+		return 0
 	}
 }

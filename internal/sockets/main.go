@@ -1,18 +1,23 @@
 package soc
 
 import (
+	"adolf-codler/file_transfer/internal/data_transfer"
 	"bufio"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
+	"sync"
 )
 
-// startServer sets up the TCP listener and accepts connections
 const (
 	DEFAULT_PORT=":4242"
 )
+
+// startServer sets up the TCP listener and accepts connections
 func StartServer() {
+	var wg sync.WaitGroup
+	log.Printf("Server started")
 	listener, err := net.Listen("tcp", DEFAULT_PORT)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
@@ -21,38 +26,45 @@ func StartServer() {
 	log.Printf("Listening to port %s",DEFAULT_PORT)
 
 	no:=0
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Printf("Connection error: %v", err)
-			continue
-		}
-		no+=1
-		go HandleClient(conn, no)
+	log.Printf("Waiting for client")
+	conn, err := listener.Accept()
+	log.Printf("Client Accepted")
+	if err != nil {
+		log.Printf("Connection error: %v", err)
 	}
+	log.Printf("Handling Client")
+	wg.Add(1)
+	go HandleClient(conn, no, &wg)
+	wg.Wait()
 }
 
 // handleClient manages individual client connections concurrently
-func HandleClient(conn net.Conn, no int) {
-	defer conn.Close()
+func HandleClient(conn net.Conn, no int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	log.Printf("Sending welcome message")
 	num := strconv.Itoa(no)
 	msg:=fmt.Sprintf("Hello from the multi-file Go TCP server! number %s\n",num)
 	conn.Write([]byte(msg))
+	log.Printf("Message sent")
+	log.Printf("Sending file")
+	transfer.SendFile(conn)
 }
 
 // startClient connects to the server and reads the message stream
 func StartClient() {
-	fmt.Println("Connecting to server at 127.0.0.1:8080...")
+	log.Printf("Connecting to server")
 	conn, err := net.Dial("tcp", "127.0.0.1:4242")
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
-	defer conn.Close()
 
+	log.Printf("Waiting for welcome")
 	message, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
 		log.Fatalf("Read error: %v", err)
 	}
 
 	fmt.Print("Server response: ", message)
+	log.Printf("Receiving file")
+	transfer.RecvFile(conn)
 }
