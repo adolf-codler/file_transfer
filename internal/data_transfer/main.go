@@ -19,7 +19,8 @@ func RecvFile(conn net.Conn, path string){
 	if path ==""{
 		path = fmt.Sprintf("receive_%s",time.Now().Format("020106_030405"))
 	}
-	file,err:=os.Create(filepath.Join("/Users/adolfcodler/Downloads/Recieve",path))
+	//file,err:=os.Create(filepath.Join("/Users/adolfcodler/Downloads/Recieve",path))
+	file,err:=os.Create(filepath.Join(".",path))
 	if err!=nil{
 		fmt.Println(err)
 		return
