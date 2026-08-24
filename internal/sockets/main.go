@@ -17,7 +17,11 @@ const (
 // startServer sets up the TCP listener and accepts connections
 func StartServer(path string) {
 	var wg sync.WaitGroup
-	log.Printf("Server started")
+	IP := getIP()
+	if IP==""{
+		log.Fatal("Error getting IP")
+	}
+	log.Printf("Server started on %s", IP)
 	listener, err := net.Listen("tcp", net.JoinHostPort("",DEFAULT_PORT))
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
@@ -51,13 +55,9 @@ func handleClient(conn net.Conn, no int, wg *sync.WaitGroup, path string) {
 }
 
 // startClient connects to the server and reads the message stream
-func StartClient(path string) {
-	IP := getIP()
-	if IP==""{
-		log.Fatal("Error getting IP")
-	}
+func StartClient(path string, ip string) {
 	log.Printf("Connecting to server")
-	conn, err := net.Dial("tcp", net.JoinHostPort(IP,DEFAULT_PORT))
+	conn, err := net.Dial("tcp", net.JoinHostPort(ip,DEFAULT_PORT))
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
@@ -87,3 +87,4 @@ func getIP() string{
 	}
 	return ""
 }
+
