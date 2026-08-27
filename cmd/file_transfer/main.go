@@ -15,6 +15,11 @@ import (
 
 ///}}}
 
+type packet struct {
+	no int
+	size int
+}
+
 // main{{{
 func main() {
 	mode, path, ip:=cli_utils.Parse()
