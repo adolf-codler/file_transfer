@@ -2,8 +2,11 @@
 package main
 
 import (
+	"context"
 	"adolf-codler/file_transfer/internal/cli"
+	"adolf-codler/file_transfer/internal/discovery"
 	"adolf-codler/file_transfer/internal/sockets"
+
 	//"adolf-codler/file_transfer/internal/data_transfer"
 	//"adolf-codler/file_transfer/internal/template"
 	//"bufio"
@@ -20,10 +23,14 @@ type packet struct {
 	size int
 }
 
+const (
+	DEFAULT_UDP_PORT = "7373"
+)
+
 // main{{{
 func main() {
-	mode, path, ip:=cli_utils.Parse()
-	if mode==0{
+	mode,path, err:=cli_utils.Parse()
+	if err!=nil{
 		return
 	}
 	/*{{{reader := bufio.NewReader(os.Stdin)
@@ -39,12 +46,14 @@ func main() {
 	choice := strings.TrimSpace(input)
 	}}}*/
 
-
 	switch mode {
 	case 's':
-		soc.StartServer(path)
+		ctx, cancel := context.WithCancel(context.Background())
+		go discovery.Broadcast(ctx, DEFAULT_UDP_PORT)
+		soc.StartServer(path, cancel)
 	case 'r':
-		soc.StartClient(path, ip)
+		ip:=discovery.ListenBroadcast(DEFAULT_UDP_PORT)
+		soc.StartClient(path, ip.IP.String())
 	default:
 		fmt.Println("Invalid choice. Please select 1 or 2.")
 	}

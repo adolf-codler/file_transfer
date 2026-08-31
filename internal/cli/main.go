@@ -2,6 +2,7 @@ package cli_utils
 
 import (
 	"adolf-codler/file_transfer/internal/template"
+	"fmt"
 	"os"
 )
 
@@ -10,23 +11,21 @@ const(
 	ARG_RECV=2
 )
 
-func Parse()(byte, string, string){
+func Parse()(byte, string, error){
 	argv:=os.Args
 	argc:=len(argv)
 	if argc<3{
 		cus_template.Usage()
-		return 0,"","" 
+		return 0, "", fmt.Errorf("not enough arguments")
 	}
 	command:=argv[1]
+	path:=argv[2]
 	if command=="s"{
-		return 's', argv[2], "" 
+		return 's', path, nil
 	} else if command=="r"{
-		if argc<4{
-			cus_template.Usage()
-		}
-		return 'r', argv[2], argv[3]
+		return 'r', path, nil
 	} else{
 		cus_template.Usage()
-		return 0, "", ""
+		return 0, "", fmt.Errorf("invalid command") 
 	}
 }

@@ -15,7 +15,7 @@ const (
 )
 
 // startServer sets up the TCP listener and accepts connections
-func StartServer(path string) {
+func StartServer(path string, onConnect func()) {
 	var wg sync.WaitGroup
 	IP := getIP()
 	if IP==""{
@@ -32,6 +32,9 @@ func StartServer(path string) {
 	no:=0
 	log.Printf("Waiting for client")
 	conn, err := listener.Accept()
+	if onConnect != nil {
+		onConnect()
+	}
 	log.Printf("Client Accepted")
 	if err != nil {
 		log.Printf("Connection error: %v", err)
