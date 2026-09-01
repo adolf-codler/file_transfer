@@ -1,4 +1,3 @@
-// package transfer
 package transfer
 
 import (
@@ -12,6 +11,15 @@ import (
 	"os"
 )
 
+
+type FileType int
+
+const (
+	SINGLE_FILE FileType = iota
+	MULTIPLE_FILE
+	FOLDER
+	FILE_FOLDER
+)
 //const CHUNK=256
 
 func RecvFile(conn net.Conn, path string){
@@ -44,4 +52,34 @@ func SendFile(conn net.Conn, path string){
 		fmt.Println(err)
 	}
 	fmt.Println("sent")
+}
+
+func ResolveData(paths []string) FileType {
+	var files, folders int
+	for _, p := range paths {
+		info, err := os.Stat(p)
+		if err != nil {
+			continue 
+		}
+		if info.IsDir() {
+			folders++
+		} else {
+			files++
+		}
+	}
+
+	if files == 1 && folders == 0 {
+		return SINGLE_FILE
+	}
+	if files > 1 && folders == 0 {
+		return MULTIPLE_FILE
+	}
+	if files == 0 && folders >= 1 {
+		return FOLDER
+	}
+	if files >= 1 && folders >= 1 {
+		return FILE_FOLDER
+	}
+
+	return SINGLE_FILE
 }

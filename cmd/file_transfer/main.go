@@ -6,8 +6,7 @@ import (
 	"adolf-codler/file_transfer/internal/cli"
 	"adolf-codler/file_transfer/internal/discovery"
 	"adolf-codler/file_transfer/internal/sockets"
-
-	//"adolf-codler/file_transfer/internal/data_transfer"
+	"adolf-codler/file_transfer/internal/transfer"
 	//"adolf-codler/file_transfer/internal/template"
 	//"bufio"
 	"fmt"
@@ -27,24 +26,23 @@ const (
 	DEFAULT_UDP_PORT = "7373"
 )
 
+type FileType int
+const(
+	SINGLE_FILE FileType = iota
+	MULTIPLE_FILE
+	FOLDER
+	FILE_FOLDER
+)
+
 // main{{{
 func main() {
-	mode,path, err:=cli_utils.Parse()
+	mode, path, err:=cli_utils.Parse()
 	if err!=nil{
+		fmt.Errorf("Parse Error: %v",err)
 		return
 	}
-	/*{{{reader := bufio.NewReader(os.Stdin)
 
-	template.TP()
-	
-
-	input, err := reader.ReadString('\n')
-	if err != nil {
-		log.Fatalf("Failed to read input: %v", err)
-	}
-
-	choice := strings.TrimSpace(input)
-	}}}*/
+	files:=transfer.ResolveData(path)
 
 	switch mode {
 	case 's':

@@ -1,13 +1,12 @@
 package soc
 
 import (
-	"adolf-codler/file_transfer/internal/data_transfer"
+	"adolf-codler/file_transfer/internal/transfer"
 	"bufio"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
-	"sync"
 )
 
 const (
@@ -15,13 +14,12 @@ const (
 )
 
 // startServer sets up the TCP listener and accepts connections
-func StartServer(path string, onConnect func()) {
-	var wg sync.WaitGroup
+func StartServer(path []string, onConnect func()) {
 	IP := getIP()
 	if IP==""{
 		log.Fatal("Error getting IP")
 	}
-	log.Printf("Server started on %s", IP)
+	log.Printf("Waiting for reciever on &v ...", IP)
 	listener, err := net.Listen("tcp", net.JoinHostPort("",DEFAULT_PORT))
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
@@ -40,14 +38,6 @@ func StartServer(path string, onConnect func()) {
 		log.Printf("Connection error: %v", err)
 	}
 	log.Printf("Handling Client")
-	wg.Add(1)
-	go handleClient(conn, no, &wg, path)
-	wg.Wait()
-}
-
-// handleClient manages individual client connections concurrently
-func handleClient(conn net.Conn, no int, wg *sync.WaitGroup, path string) {
-	defer wg.Done()
 	log.Printf("Sending welcome message")
 	num := strconv.Itoa(no)
 	msg:=fmt.Sprintf("Hello from the multi-file Go TCP server! number %s\n",num)
@@ -58,7 +48,7 @@ func handleClient(conn net.Conn, no int, wg *sync.WaitGroup, path string) {
 }
 
 // startClient connects to the server and reads the message stream
-func StartClient(path string, ip string) {
+func StartClient(path []string, ip string) {
 	log.Printf("Connecting to server")
 	conn, err := net.Dial("tcp", net.JoinHostPort(ip,DEFAULT_PORT))
 	if err != nil {
