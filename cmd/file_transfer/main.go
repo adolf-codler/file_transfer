@@ -26,13 +26,6 @@ const (
 	DEFAULT_UDP_PORT = "7373"
 )
 
-type FileType int
-const(
-	SINGLE_FILE FileType = iota
-	MULTIPLE_FILE
-	FOLDER
-	FILE_FOLDER
-)
 
 // main{{{
 func main() {
@@ -42,7 +35,7 @@ func main() {
 		return
 	}
 
-	files:=transfer.ResolveData(path)
+	_ = transfer.ResolveData(path)
 
 	switch mode {
 	case 's':

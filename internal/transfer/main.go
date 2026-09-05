@@ -5,26 +5,19 @@ import (
 	"io"
 	"path/filepath"
 	"time"
-
-	//"io/fs"
 	"net"
 	"os"
 )
 
 
-type FileType int
-
-const (
-	SINGLE_FILE FileType = iota
-	MULTIPLE_FILE
-	FOLDER
-	FILE_FOLDER
-)
 //const CHUNK=256
 
-func RecvFile(conn net.Conn, path string){
+func RecvFile(conn net.Conn, paths []string){
 	defer conn.Close()
-	if path ==""{
+	var path string
+	if len(paths) > 0 && paths[0] != "" {
+		path = paths[0]
+	} else {
 		path = fmt.Sprintf("receive_%s",time.Now().Format("020106_030405"))
 	}
 	//file,err:=os.Create(filepath.Join("/Users/adolfcodler/Downloads/Recieve",path))
@@ -41,7 +34,11 @@ func RecvFile(conn net.Conn, path string){
 	}
 } 
 
-func SendFile(conn net.Conn, path string){
+func SendFile(conn net.Conn, paths []string){
+	var path string
+	if len(paths) > 0 {
+		path = paths[0]
+	}
 	file, err:=os.Open(path)
 	if err!=nil{
 		fmt.Println(err)
@@ -54,32 +51,3 @@ func SendFile(conn net.Conn, path string){
 	fmt.Println("sent")
 }
 
-func ResolveData(paths []string) FileType {
-	var files, folders int
-	for _, p := range paths {
-		info, err := os.Stat(p)
-		if err != nil {
-			continue 
-		}
-		if info.IsDir() {
-			folders++
-		} else {
-			files++
-		}
-	}
-
-	if files == 1 && folders == 0 {
-		return SINGLE_FILE
-	}
-	if files > 1 && folders == 0 {
-		return MULTIPLE_FILE
-	}
-	if files == 0 && folders >= 1 {
-		return FOLDER
-	}
-	if files >= 1 && folders >= 1 {
-		return FILE_FOLDER
-	}
-
-	return SINGLE_FILE
-}
