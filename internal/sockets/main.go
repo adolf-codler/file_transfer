@@ -1,4 +1,4 @@
-package soc
+package soc// {{{
 
 import (
 	"adolf-codler/file_transfer/internal/transfer"
@@ -11,23 +11,22 @@ import (
 
 const (
 	DEFAULT_PORT="4242"
-)
+)// }}}
 
 // startServer sets up the TCP listener and accepts connections
-func StartServer(path []string, onConnect func()) {
+func StartServer(path []string, onConnect func())(error){
 	IP := getIP()
 	if IP==""{
-		log.Fatal("Error getting IP")
+		return fmt.Errorf("Error getting IP")
 	}
-	log.Printf("Waiting for reciever on &v ...", IP)
+	log.Printf("Waiting for reciever on %v ...", IP)
 	listener, err := net.Listen("tcp", net.JoinHostPort("",DEFAULT_PORT))
 	if err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		return fmt.Errorf("Failed to start server: %w", err)
 	}
 	defer listener.Close()
 	log.Printf("Listening to port %s",DEFAULT_PORT)
 
-	no:=0
 	log.Printf("Waiting for client")
 	conn, err := listener.Accept()
 	if onConnect != nil {
@@ -65,13 +64,12 @@ func StartClient(path []string, ip string) {
 	log.Printf("Received")
 }
 
-func getIP() string{
+func getIP() string{// {{{
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, addr := range addrs {
-		// Check if the address is an IP net and not a loopback (like 127.0.0.1)
 		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
 			if ipNet.IP.To4() != nil {
 				return ipNet.IP.String()
@@ -79,5 +77,5 @@ func getIP() string{
 		}
 	}
 	return ""
-}
+}// }}}
 

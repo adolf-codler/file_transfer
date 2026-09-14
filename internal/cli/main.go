@@ -7,7 +7,7 @@ import (
 )
 
 const(
-	ARG=3
+	ARG=2
 )
 
 func Parse()(byte, []string, error){

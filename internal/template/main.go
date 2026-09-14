@@ -13,5 +13,5 @@ func TP(){
 	fmt.Print("Choose mode (1 or 2): ")
 }
 func Usage(){
-	fmt.Printf("file_transfer <cmd> <file> \n cmd:s <ip>")
+	fmt.Printf("file_transfer <cmd> <file> \n cmd:s <ip>\n")
 }

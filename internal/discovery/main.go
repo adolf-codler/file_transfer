@@ -1,4 +1,4 @@
-package discovery
+package discovery// {{{
 
 import (
 	"context"
@@ -10,71 +10,71 @@ import (
 
 const (
 	PHRASE = "DISOLF_UDPLER" 
-)
+)// }}}
 
-func Broadcast(ctx context.Context, broadPort string){// {{{
+func Broadcast(ctx context.Context, broadPort string)(error){// {{{
+	// initializing broadcast{{{
 	broadIP, err:=getSubnet()
 	if err!=nil{
-		fmt.Println("getSubnet error:", err)
+		return fmt.Errorf("Subnet Error: %w", err)
 	} else {
 		fmt.Println("Broadcasting at", broadIP)
 	}
 	broadAddr:= net.JoinHostPort(broadIP, broadPort)
 	addr, err:= net.ResolveUDPAddr("udp4", broadAddr)
 	if err != nil{
-		log.Println("Resolve Error:",err)
+		return fmt.Errorf("Resolve Error: %w",err)
 	}
 	conn, err:=net.DialUDP("udp4", nil, addr)
 	if err != nil{
-		log.Println("Dial Error:",err)
+		return fmt.Errorf("Dial Error: %w",err)
 	}
-	defer conn.Close()
+	defer conn.Close()// }}}
 
+	// periodic broadcasting{{{
 	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
-
-	// Broadcast immediately the first time
 	msg:=[]byte(PHRASE)
 	conn.Write(msg)
 	fmt.Println("Waiting for Receiver ...")
-
 	for {
 		select {
 		case <-ctx.Done():
 			fmt.Println("\nReceiver connected! Stopping UDP broadcast...")
-			return
+			return nil
 		case <-ticker.C:
 			_, err:=conn.Write(msg)
 			if err != nil{
 				log.Println("Write Error:",err)
 			}
 		}
-	}
+	}// }}}
 }// }}}
 
-func ListenBroadcast(broadPort string)(net.UDPAddr){// {{{
+func ListenBroadcast(broadPort string)(net.UDPAddr, error){// {{{
+	// initializing listener{{{
 	broadAddr := net.JoinHostPort("", broadPort)
 	addr, err:= net.ResolveUDPAddr("udp4", broadAddr)
 	if err != nil{
-		log.Println("Resolve Error", err)
+		return net.UDPAddr{}, fmt.Errorf("Resolve Error: %w", err)
 	}
 	conn, err:=net.ListenUDP("udp4", addr)
 	if err != nil{
-		log.Println("Listen Error:", err)
+		return net.UDPAddr{}, fmt.Errorf("Listen Error: %w", err)
 	}
-	defer conn.Close()
+	defer conn.Close()// }}}
+
 	fmt.Println("Waiting for Sender ...")
 	buf:=make([]byte,1024)
 	for {
 		n, remoteAddr, err := conn.ReadFromUDP(buf)
 		if err != nil {
-			log.Println("Error reading:", err)
-			continue
+			return net.UDPAddr{}, fmt.Errorf("Reading from udp Error: %w", err)
 		}
 		msg := string(buf[:n])
 		fmt.Printf("Received '%s' from %s\n", msg, remoteAddr)
 		if msg == PHRASE{
-			return *remoteAddr
+			return *remoteAddr, nil
 		} else{
 			continue
 		}
