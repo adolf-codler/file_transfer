@@ -2,11 +2,9 @@ package soc// {{{
 
 import (
 	"adolf-codler/file_transfer/internal/transfer"
-	"bufio"
 	"fmt"
 	"log"
 	"net"
-	"strconv"
 )
 
 const (
@@ -37,31 +35,28 @@ func StartServer(path []string, onConnect func())(error){
 		log.Printf("Connection error: %v", err)
 	}
 	log.Printf("Handling Client")
-	log.Printf("Sending welcome message")
-	num := strconv.Itoa(no)
-	msg:=fmt.Sprintf("Hello from the multi-file Go TCP server! number %s\n",num)
-	conn.Write([]byte(msg))
-	log.Printf("Message sent")
 	log.Printf("Sending file")
-	transfer.SendFile(conn, path)
+	err=transfer.SendFile(conn, path)
+	if err!=nil{
+		return fmt.Errorf("%w", err)
+	}
+	return nil
 }
 
 // startClient connects to the server and reads the message stream
-func StartClient(path []string, ip string) {
+func StartClient(path []string, ip string)error {
 	log.Printf("Connecting to server")
 	conn, err := net.Dial("tcp", net.JoinHostPort(ip,DEFAULT_PORT))
 	if err != nil {
-		log.Fatalf("Failed to connect: %v", err)
+		return fmt.Errorf("Dial Error: %w", err)
 	}
-	log.Printf("Waiting for welcome")
-	message, err := bufio.NewReader(conn).ReadString('\n')
-	if err != nil {
-		log.Fatalf("Read error: %v", err)
-	}
-	fmt.Print("Server response: ", message)
 	log.Printf("Receiving file")
-	transfer.RecvFile(conn, path)
+	err=transfer.RecvFile(conn)
+	if err!=nil{
+		return fmt.Errorf("%w", err)
+	}
 	log.Printf("Received")
+	return nil
 }
 
 func getIP() string{// {{{

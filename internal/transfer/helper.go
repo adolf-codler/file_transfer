@@ -2,13 +2,16 @@ package transfer
 
 import (
 	"archive/zip"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
 )
-
 
 type FileType int
 
@@ -16,8 +19,60 @@ const (
 	SINGLE_FILE FileType = iota
 	MULTIPLE_FILE
 )
-// Zip compresses a list of files or directories into a target zip file on disk.
-func Zip(targetZipPath string, sourcePaths []string) error {
+
+// FileData holds metadata about the file being transferred
+type FileData struct {
+	Name string   `json:"name"`
+	Size int64    `json:"size"`
+	Type FileType `json:"type"`
+}
+
+// SendMeta sends length-prefixed JSON metadata over the connection without buffering extra bytes
+func SendMeta(conn net.Conn, meta FileData) error {
+	log.Printf("Sending Meta: name=%s, size=%d bytes\n", meta.Name, meta.Size)
+	data, err := json.Marshal(meta)
+	if err != nil {
+		return fmt.Errorf("SendMeta marshal error: %w", err)
+	}
+
+	// Send 4-byte big-endian length prefix
+	length := uint32(len(data))
+	if err := binary.Write(conn, binary.BigEndian, length); err != nil {
+		return fmt.Errorf("SendMeta length prefix error: %w", err)
+	}
+
+	// Send metadata payload
+	if _, err := conn.Write(data); err != nil {
+		return fmt.Errorf("SendMeta data error: %w", err)
+	}
+	return nil
+}
+
+// RecvMeta reads exact length-prefixed JSON metadata without consuming any subsequent file stream bytes
+func RecvMeta(conn net.Conn) (FileData, error) {
+	var meta FileData
+
+	// Read exact 4-byte big-endian length prefix
+	var length uint32
+	if err := binary.Read(conn, binary.BigEndian, &length); err != nil {
+		return meta, fmt.Errorf("RecvMeta length prefix error: %w", err)
+	}
+
+	// Read exact metadata payload bytes
+	buf := make([]byte, length)
+	if _, err := io.ReadFull(conn, buf); err != nil {
+		return meta, fmt.Errorf("RecvMeta payload error: %w", err)
+	}
+
+	if err := json.Unmarshal(buf, &meta); err != nil {
+		return meta, fmt.Errorf("RecvMeta unmarshal error: %w", err)
+	}
+
+	log.Printf("Received Meta: name=%s, size=%d bytes\n", meta.Name, meta.Size)
+	return meta, nil
+}
+
+func Zip(targetZipPath string, sourcePaths []string) error {// {{{
 	// Create the output zip file
 	zipFile, err := os.Create(targetZipPath)
 	if err != nil {
@@ -77,10 +132,9 @@ func Zip(targetZipPath string, sourcePaths []string) error {
 		}
 	}
 	return nil
-}
+}// }}}
 
-// Unzip extracts a zip archive to a target directory.
-func Unzip(sourceZipPath, targetDir string) error {
+func Unzip(sourceZipPath, targetDir string) error {// {{{
 	reader, err := zip.OpenReader(sourceZipPath)
 	if err != nil {
 		return err
@@ -139,9 +193,9 @@ func Unzip(sourceZipPath, targetDir string) error {
 		}
 	}
 	return nil
-}
+}// }}}
 
-func ResolveData(paths []string) FileType {
+func ResolveData(paths []string) FileType {// {{{
 	files := 0
 	for _, p := range paths {
 		if fi, err := os.Stat(p); err != nil {
@@ -156,4 +210,4 @@ func ResolveData(paths []string) FileType {
 		}
 	}
 	return SINGLE_FILE
-}
+}// }}}

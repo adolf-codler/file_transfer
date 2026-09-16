@@ -19,13 +19,13 @@ import (
 
 ///}}}
 
-type FileMeta struct {
+type FileMeta struct {// {{{
 	header string
 }
 
 const (
 	DEFAULT_UDP_PORT = "7373"
-)
+)// }}}
 
 
 // main{{{
@@ -35,7 +35,7 @@ func main() {
 		log.Fatalf("Parse Error: %v",err)
 	}
 
-	_ = transfer.ResolveData(path)
+	_ = transfer.ResolveData(path) // Todo: add multi file support
 
 	switch mode {
 	case 's':
@@ -45,13 +45,19 @@ func main() {
 				log.Fatalf("Broadcasting error: %s", err)
 			}
 		}()
-		soc.StartServer(path, cancel)
+		err:=soc.StartServer(path, cancel)
+		if err!=nil{
+			log.Fatalf("Server Error: %s", err)
+		}
 	case 'r':
 		ip, err:=discovery.ListenBroadcast(DEFAULT_UDP_PORT)
 		if err!=nil{
 			log.Fatalf("Listening Error: %s", err)
 		}
-		soc.StartClient(path, ip.IP.String())
+		err=soc.StartClient(path, ip.IP.String())
+		if err!=nil{
+			log.Fatalf("Client Error: %s", err)
+		}
 	default:
 		fmt.Println("Invalid choice. Please select 1 or 2.")
 	}
