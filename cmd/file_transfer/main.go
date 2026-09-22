@@ -8,7 +8,6 @@ import (
 	"adolf-codler/file_transfer/internal/transfer"
 	"context"
 	"log"
-
 	//"adolf-codler/file_transfer/internal/template"
 	//"bufio"
 	"fmt"

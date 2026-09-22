@@ -6,11 +6,12 @@ import (
 	"log"
 	"net"
 	"time"
-)
+)// }}}
+
 
 const (
 	PHRASE = "DISOLF_UDPLER" 
-)// }}}
+)
 
 func Broadcast(ctx context.Context, broadPort string)(error){// {{{
 	// initializing broadcast{{{
