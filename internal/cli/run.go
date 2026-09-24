@@ -8,8 +8,8 @@ import (
 )
 
 const(
-	DEFAULT_UDP_PORT = ":6967"
-	DEFAULT_PORT = ":6769"
+	DEFAULT_UDP_PORT = "6967"
+	DEFAULT_PORT = "6769"
 )
 
 func (c *Cli) Run() error{
