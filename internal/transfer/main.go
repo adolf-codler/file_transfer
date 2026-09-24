@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-//const CHUNK=256
-
 func RecvFile(conn net.Conn) error {
 	defer conn.Close()
 
