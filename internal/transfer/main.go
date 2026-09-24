@@ -4,7 +4,6 @@ import (
 	"adolf-codler/file_transfer/internal/progress_bar"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"path/filepath"
@@ -14,7 +13,7 @@ import (
 func RecvFile(conn net.Conn) error {
 	defer conn.Close()
 
-	log.Printf("Receiving Meta \r")
+	fmt.Printf("\rReceiving Meta... ")
 	meta, err := RecvMeta(conn)
 	if err != nil {
 		return fmt.Errorf("RecvMeta Error: %w", err)

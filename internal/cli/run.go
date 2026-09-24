@@ -15,16 +15,13 @@ const(
 func (c *Cli) Run() error{
 	if c.Type=="send"{
 		ctx, cancel := context.WithCancel(context.Background())
-		if err:=discovery.Broadcast(ctx, DEFAULT_PORT); err!=nil{
-			return err
-		}
 		if len(c.File)==1{
 			go func(){
 				if err := discovery.Broadcast(ctx, DEFAULT_UDP_PORT); err != nil{
 					log.Fatalf("Broadcasting error: %s", err)
 				}
 			}()
-			err:=cus_soc.StartServer([]string{"."}, cancel)
+			err:=cus_soc.StartServer(c.File, cancel)
 			if err!=nil{
 				log.Fatalf("Server Error: %s", err)
 			}
@@ -36,7 +33,7 @@ func (c *Cli) Run() error{
 		if err!=nil{
 			log.Fatalf("Listening Error: %s", err)
 		}
-		err=cus_soc.StartClient([]string{"."}, ip.IP.String())
+		err=cus_soc.StartClient(c.File, ip.IP.String())
 		if err!=nil{
 			log.Fatalf("Client Error: %s", err)
 		}
