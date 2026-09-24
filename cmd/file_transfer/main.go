@@ -2,63 +2,18 @@
 package main
 
 import (
-	"adolf-codler/file_transfer/internal/cli"
-	"adolf-codler/file_transfer/internal/discovery"
-	"adolf-codler/file_transfer/internal/sockets"
-	"adolf-codler/file_transfer/internal/transfer"
-	"context"
 	"log"
-	//"adolf-codler/file_transfer/internal/template"
-	//"bufio"
-	"fmt"
-	//"log"
-	//"os"
-	//"strings"
-)
-
-///}}}
-
-type FileMeta struct {// {{{
-	header string
-}
-
-const (
-	DEFAULT_UDP_PORT = "7373"
-)// }}}
+	"github.com/alecthomas/kong"
+	"adolf-codler/file_transfer/internal/cli"
+)///}}}
 
 
 // main{{{
 func main() {
-	mode, path, err:=cli_utils.Parse()
-	if err!=nil{
-		log.Fatalf("Parse Error: %v",err)
-	}
-
-	_ = transfer.ResolveData(path) // Todo: add multi file support
-
-	switch mode {
-	case 's':
-		ctx, cancel := context.WithCancel(context.Background())
-		go func(){
-			if err := discovery.Broadcast(ctx, DEFAULT_UDP_PORT); err != nil{
-				log.Fatalf("Broadcasting error: %s", err)
-			}
-		}()
-		err:=soc.StartServer(path, cancel)
-		if err!=nil{
-			log.Fatalf("Server Error: %s", err)
-		}
-	case 'r':
-		ip, err:=discovery.ListenBroadcast(DEFAULT_UDP_PORT)
-		if err!=nil{
-			log.Fatalf("Listening Error: %s", err)
-		}
-		err=soc.StartClient(path, ip.IP.String())
-		if err!=nil{
-			log.Fatalf("Client Error: %s", err)
-		}
-	default:
-		fmt.Println("Invalid choice. Please select 1 or 2.")
+	var cli cus_cli.Cli
+	ctx:= kong.Parse(&cli, kong.Name("FileTransfer"), kong.Description("Transfer files over TCP"), )
+	if err:=ctx.Run(); err!=nil{
+		log.Fatalln("Run error: ", err)
 	}
 }
 //}}}

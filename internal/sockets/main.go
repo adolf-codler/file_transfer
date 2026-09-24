@@ -1,4 +1,4 @@
-package soc// {{{
+package cus_soc// {{{
 
 import (
 	"adolf-codler/file_transfer/internal/transfer"
